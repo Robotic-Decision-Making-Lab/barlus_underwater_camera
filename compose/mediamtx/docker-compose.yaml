@@ -1,0 +1,11 @@
+services:
+
+  # Runs mediamtx server in docker.
+  #
+  # Loads config file from current directory.
+  mediamtx:
+    image: bluenviron/mediamtx:latest
+    network_mode: host
+    tty: true
+    volumes:
+      - ./mediamtx.yml:/mediamtx.yml
