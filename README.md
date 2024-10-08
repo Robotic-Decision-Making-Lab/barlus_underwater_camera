@@ -42,17 +42,17 @@ docker compose up
 Once running, the stream can be played using FFmpeg
 
 ```bash
-ffplay rtsp://<your-computur's ip>:<mediamtx-port>/barlus
+ffplay rtsp://<your-ip-address>:<mediamtx-port>/barlus
 ```
 
 For low latency FFmpeg streaming, run the following
 
 ```bash
-ffplay  -fflags nobuffer -flags low_delay -probesize 32 -rtsp_transport udp -i rtsp://<your-computur's ip>:<mediamtx-port>/barlus
+ffplay  -fflags nobuffer -flags low_delay -probesize 32 -rtsp_transport udp -i rtsp://<your-ip-address>:<mediamtx-port>/barlus
 ```
 
 The stream can also be recorded using
 
 ```bash
-ffmpeg -i rtsp://<your-computur's ip>:<mediamtx-port>/barlus -c:v copy -an recording.mp4
+ffmpeg -i rtsp://<your-ip-address>:<mediamtx-port>/barlus -c:v copy -an recording.mp4
 ```
