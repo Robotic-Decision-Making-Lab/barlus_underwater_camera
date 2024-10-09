@@ -2,9 +2,9 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
 
-  <name>example_pkg</name>
+  <name>barlus_gstreamer_proxy</name>
   <version>0.0.1</version>
-  <description>A sample ROS 2 package</description>
+  <description>A light wrapper around GStreamer to convert the camera stream into a ROS 2 feed</description>
 
   <maintainer email="evanp922@gmail.com">Evan Palmer</maintainer>
   <license>MIT</license>
@@ -14,15 +14,12 @@
 
   <author>Evan Palmer</author>
 
-  <buildtool_depend>ament_cmake</buildtool_depend>
-
-  <test_depend>ament_lint_auto</test_depend>
-
-  <test_depend>ament_cmake_copyright</test_depend>
-  <test_depend>ament_cmake_lint_cmake</test_depend>
-  <test_depend>ament_cmake_xmllint</test_depend>
+  <depend>sensor_msgs</depend>
+  <depend>python3-numpy</depend>
+  <depend>cv_bridge</depend>
+  <depend>generate_parameter_library</depend>
 
   <export>
-    <build_type>ament_cmake</build_type>
+    <build_type>ament_python</build_type>
   </export>
 </package>

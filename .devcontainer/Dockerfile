@@ -24,6 +24,26 @@ RUN apt-get -q update \
     && apt-get clean -y \
     && rm -rf /var/lib/apt/lists/*
 
+# Install GStreamer
+RUN apt-get -q update \
+    && apt-get -q -y upgrade \
+    && apt-get -q install --no-install-recommends -y \
+    gir1.2-gstreamer-1.0\
+    gstreamer1.0-libav \
+    gstreamer1.0-plugins-bad \
+    gstreamer1.0-plugins-base \
+    gstreamer1.0-plugins-good \
+    gstreamer1.0-plugins-ugly \
+    gstreamer1.0-tools \
+    libcairo2-dev \
+    libgif-dev \
+    libjpeg-dev \
+    python3-gi \
+    python3-pip\
+    && apt-get autoremove -y \
+    && apt-get clean -y \
+    && rm -rf /var/lib/apt/lists/*
+
 # Configure the ubuntu non-root user
 ARG USERNAME=ubuntu
 ARG USER_UID=1000

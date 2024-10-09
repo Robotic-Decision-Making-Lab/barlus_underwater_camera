@@ -56,3 +56,10 @@ The stream can also be recorded using
 ```bash
 ffmpeg -i rtsp://<your-ip-address>:<mediamtx-port>/barlus -c:v copy -an recording.mp4
 ```
+
+## ROS 2 interface
+
+A collection of ROS 2 nodes have been implemented to convert the video stream
+into ROS 2 messages for image processing.
+
+TODO(evan-palmer): Finish writing about this.
