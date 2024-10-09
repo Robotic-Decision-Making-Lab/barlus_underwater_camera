@@ -1,0 +1,56 @@
+aruco_detector_parameters:
+  aruco_dictionary:
+    type: string
+    default_value: 0
+    description: The dictionary ID.
+    validation:
+      one_of<>: [
+        DICT_4X4_50,
+        DICT_4X4_100,
+        DICT_4X4_250,
+        DICT_4X4_1000,
+        DICT_5X5_50,
+        DICT_5X5_100,
+        DICT_5X5_250,
+        DICT_5X5_1000,
+        DICT_6X6_50,
+        DICT_6X6_100,
+        DICT_6X6_250,
+        DICT_6X6_1000,
+        DICT_7X7_50,
+        DICT_7X7_100,
+        DICT_7X7_250,
+        DICT_7X7_1000,
+        DICT_ARUCO_ORIGINAL,
+      ]
+
+  frame_id:
+    type: string
+    default_value: base_link
+    description: The frame ID to assign to the marker detected.
+
+  marker_transform:
+    x:
+      type: double
+      default_value: 0.0
+      description: The translation in the x-axis to apply to the pose of the detected marker.
+    y:
+      type: double
+      default_value: 0.0
+      description: The translation in the y-axis to apply to the pose of the detected marker.
+    z:
+      type: double
+      default_value: 0.0
+      description: The translation in the z-axis to apply to the pose of the detected marker.
+    rx:
+      type: double
+      default_value: 0.0
+      description: The rotation about the x-axis to apply to the pose of the detected marker.
+    ry:
+      type: double
+      default_value: 0.0
+      description: The rotation about the y-axis to apply to the pose of the detected marker.
+    rz:
+      type: double
+      default_value: 0.0
+      description: The rotation about the z-axis to apply to the pose of the detected marker.
