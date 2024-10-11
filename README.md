@@ -17,7 +17,7 @@ In order to connect to the camera, add a new IPv4 network configuration with
 the same Netmask and Gateway used by the camera. For example,
 
 ```bash
-Address: 192.168.1.18
+Address: 192.168.1.17
 Netmask: 255.255.255.0
 Gateway: 192.168.1.1
 ```
@@ -59,7 +59,14 @@ ffmpeg -i rtsp://<your-ip-address>:<mediamtx-port>/barlus -c:v copy -an recordin
 
 ## ROS 2 interface
 
-A collection of ROS 2 nodes have been implemented to convert the video stream
-into ROS 2 messages for image processing.
+`barlus_gstreamer_proxy`, a light wrapper around GStreamer has been implemented
+to convert frames received from the camera into ROS 2 `sensor_msgs/Image`
+messages. After building `barlus_gstreamer_proxy`, the node can be launched
+using
 
-TODO(evan-palmer): Finish writing about this.
+```bash
+ros2 launch barlus_gstreamer_proxy gstreamer_proxy.launch.yaml
+```
+
+The frames will be published to the topic `/barlus/image_raw`. The camera
+intrinsics are available on the topic `/barlus/camera_info`.

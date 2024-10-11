@@ -126,11 +126,9 @@ class GStreamerProxy(Node):
         return video_pipe, video_sink
 
 
-def main(args: list[str] | None = None):
+def main(args=None):
     rclpy.init(args=args)
-
     proxy_node = GStreamerProxy()
     rclpy.spin(proxy_node)
-
     proxy_node.destroy_node()
     rclpy.shutdown()
