@@ -3,4 +3,4 @@
 
 # Except the following
 !barlus_gstreamer_proxy
-!barlus_fiducial_detection
+!compose
