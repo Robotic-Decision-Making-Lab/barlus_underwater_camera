@@ -1,0 +1,46 @@
+gstreamer_proxy_parameters:
+  stream_address:
+    type: string
+    default_value: rtsp://192.168.1.17:8554/barlus
+    description: The RTSP stream address. This can be either the stream from the camera itself or from MediaMTX.
+
+  distortion_model:
+    type: string
+    default_value: "plumb_bob"
+    description: The distortion model of the camera.
+
+  frame:
+    height:
+      type: int
+      default_value: 1080
+      description: The height of the frame.
+
+    width:
+      type: int
+      default_value: 1920
+      description: The width of the frame.
+
+  camera_matrix:
+    type: double_array
+    default_value: [1.0, 0.0, 0.0,
+                    0.0, 1.0, 0.0,
+                    0.0, 0.0, 1.0]
+    description: The camera matrix.
+    validation:
+      fixed_size<>: 9
+
+  distortion_coefficients:
+    type: double_array
+    default_value: [0.0, 0.0, 0.0, 0.0, 0.0]
+    description: The distortion coefficients.
+    validation:
+      fixed_size<>: 5
+
+  projection_matrix:
+    type: double_array
+    default_value: [1.0, 0.0, 0.0, 0.0,
+                    0.0, 1.0, 0.0, 0.0,
+                    0.0, 0.0, 1.0, 0.0]
+    description: The projection matrix.
+    validation:
+      fixed_size<>: 12

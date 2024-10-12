@@ -1,38 +1,72 @@
-# ROS 2 Project Template
+# Barlus Underwater Camera
 
-Setting up a new ROS 2 project often requires a significant amount of
-preparation and boilerplate configuration, costing you valuable robot
-development time 🤖. Recognizing this, we have put together this template
-repository configured with a ROS 2 development environment, continuous
-integration, and more. This project is the result of much trial and error
-across many projects, and we hope that this helps you save some effort in
-setting up your own projects.
+This package provides configurations and a ROS 2 interface for interacting with
+the Barlus UW-S5-3PBX10 underwater camera.
 
-## Features
+## Network Configuration
 
-The main features of this template are:
+The default network configurations for the Barlus UW-S5-3PBX10 are as follows:
 
-- A development environment for Visual Studio Code including a [development container](https://code.visualstudio.com/docs/devcontainers/containers)
-and configurations for linting and auto-formatting your code
-- Docker images that support deployment to a variety of systems (e.g., arm64
-systems)
-- Continuous integration and deployment pipelines using GitHub Actions
-- GitHub Issue and Pull Request templates
+```bash
+Address: 192.168.1.10 # Verify this using the Barlus VCS software
+Netmask: 255.255.255.0
+Gateway: 192.168.1.1
+```
 
-## Quick start
+In order to connect to the camera, add a new IPv4 network configuration with
+the same Netmask and Gateway used by the camera. For example,
 
-Using this template is as easy as 1, 2, 3...
+```bash
+Address: 192.168.1.17
+Netmask: 255.255.255.0
+Gateway: 192.168.1.1
+```
 
-1. Use this repository [as a template](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-repository-from-a-template)
-for your project
-2. Replace all instances of "ros2-template" with your own project's name
-3. Replace the source code with your own project!
+## Using MediaMTX proxy
 
-Feel free to remove any unused configurations/pipelines and to adjust things as
-you see fit for your project!
+MediaMTX can be used to connect to the RTSP server embedded into the camera to
+multiplex the camera stream.
 
-## Getting help
+Prior to launching MediaMTX, first check the MediaMTX configurations set in
+the `compose/mediamtx/mediamtx.yml` file. In particular, confirm that the
+`barlus` RTSP path uses the correct IP address and authentication information
+for your specific camera setup.
 
-If you have questions regarding usage of this project or would like to
-contribute, please ask a question on our [Discussions](https://github.com/Robotic-Decision-Making-Lab/ros2-template/discussions)
-board!
+After verifying the MediaMTX configurations, launch MediaMTX with `docker compose`
+
+```bash
+cd /path/to/compose/mediamtx \
+docker compose up
+```
+
+Once running, the stream can be played using FFmpeg
+
+```bash
+ffplay rtsp://<your-ip-address>:<mediamtx-port>/barlus
+```
+
+For low latency FFmpeg streaming, run the following
+
+```bash
+ffplay  -fflags nobuffer -flags low_delay -probesize 32 -rtsp_transport udp -i rtsp://<your-ip-address>:<mediamtx-port>/barlus
+```
+
+The stream can also be recorded using
+
+```bash
+ffmpeg -i rtsp://<your-ip-address>:<mediamtx-port>/barlus -c:v copy -an recording.mp4
+```
+
+## ROS 2 interface
+
+`barlus_gstreamer_proxy`, a light wrapper around GStreamer has been implemented
+to convert frames received from the camera into ROS 2 `sensor_msgs/Image`
+messages. After building `barlus_gstreamer_proxy`, the node can be launched
+using
+
+```bash
+ros2 launch barlus_gstreamer_proxy gstreamer_proxy.launch.yaml
+```
+
+The frames will be published to the topic `/barlus/image_raw`. The camera
+intrinsics are available on the topic `/barlus/camera_info`.
