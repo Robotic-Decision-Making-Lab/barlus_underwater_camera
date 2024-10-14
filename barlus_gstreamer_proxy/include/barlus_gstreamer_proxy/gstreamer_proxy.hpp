@@ -52,8 +52,8 @@ private:
   std::shared_ptr<gstreamer_proxy::ParamListener> param_listener_;
   gstreamer_proxy::Params params_;
 
-  std::shared_ptr<rclcpp::Publisher<Image>> image_pub_;
-  std::shared_ptr<rclcpp::Publisher<CameraInfo>> camera_info_pub_;
+  std::shared_ptr<rclcpp::Publisher<sensor_msgs::msg::Image>> image_pub_;
+  std::shared_ptr<rclcpp::Publisher<sensor_msgs::msg::CameraInfo>> camera_info_pub_;
 
   GstElement * pipeline_;
 };
