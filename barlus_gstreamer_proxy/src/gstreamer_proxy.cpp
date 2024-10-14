@@ -38,7 +38,7 @@ auto GStreamerProxy::on_configure(const rclcpp_lifecycle::State & /*state*/) -> 
   g_signal_connect(
     sink,
     "new-sample",
-    G_CALLBACK([](GstElement * sink, gpointer user_data) {
+    G_CALLBACK([this](GstElement * sink, gpointer user_data) {
       GstSample * sample = gst_app_sink_pull_sample(GST_APP_SINK(sink));
       GstBuffer * buffer = gst_sample_get_buffer(sample);
       GstMapInfo map;
@@ -54,6 +54,14 @@ auto GStreamerProxy::on_configure(const rclcpp_lifecycle::State & /*state*/) -> 
       return GST_FLOW_OK;
     }),
     nullptr);
+
+  return CallbackReturn::SUCCESS;
+}
+
+auto GStreamerProxy::on_shutdown(const rclcpp_lifecycle::State & /*state*/) -> CallbackReturn
+{
+  gst_element_set_state(pipeline_, GST_STATE_NULL);
+  gst_object_unref(pipeline_);
 
   return CallbackReturn::SUCCESS;
 }
