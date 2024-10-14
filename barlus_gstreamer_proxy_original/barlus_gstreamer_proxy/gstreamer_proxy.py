@@ -20,6 +20,7 @@
 
 from typing import Any
 
+import cv2 as cv
 import gi
 import gi.repository
 import numpy as np
@@ -82,7 +83,7 @@ class GStreamerProxy(Node):
 
         camera_info = CameraInfo()
         camera_info.header.stamp = self.get_clock().now().to_msg()
-        camera_info.header.frame_id = "barlus/camera_link"
+        camera_info.header.frame_id = "/barlus/camera_link"
         camera_info.height = self.params.frame.height
         camera_info.width = self.params.frame.width
         camera_info.distortion_model = self.params.distortion_model
@@ -118,7 +119,9 @@ class GStreamerProxy(Node):
 
         def proxy_frame_cb(sink: Any) -> gi.repository.Gst.FlowReturn:
             frame = gst_to_numpy(sink.emit("pull-sample"))
-            self.image_pub.publish(self.bridge.cv2_to_imgmsg(frame))
+            grey = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
+            self.get_logger().info(f"Frame shape: {grey.shape}")
+            self.image_pub.publish(self.bridge.cv2_to_imgmsg(grey, encoding="mono8"))
             return gi.repository.Gst.FlowReturn.OK
 
         video_sink.connect("new-sample", proxy_frame_cb)

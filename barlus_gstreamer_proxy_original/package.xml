@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+
+  <name>barlus_gstreamer_proxy</name>
+  <version>0.0.1</version>
+  <description>A light wrapper around GStreamer to convert the camera stream into a ROS 2 feed</description>
+
+  <maintainer email="evanp922@gmail.com">Evan Palmer</maintainer>
+  <license>MIT</license>
+
+  <url type="repository">https://github.com/Robotic-Decision-Making-Lab/barlus_underwater_camera.git</url>
+  <url type="bugtracker">https://github.com/Robotic-Decision-Making-Lab/barlus_underwater_camera/issues</url>
+
+  <author>Evan Palmer</author>
+
+  <!-- <build_depend>rclcpp</build_depend>
+  <build_depend>libgstreamer1.0-dev</build_depend>
+  <build_depend>libgstreamer-plugins-base1.0-dev</build_depend>
+
+  <build_depend>std_msgs</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+
+  <exec_depend>std_msgs</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
+  <exec_depend>gstreamer1.0</exec_depend>
+  <exec_depend>gstreamer1.0-plugins-base</exec_depend>
+  <exec_depend>gstreamer1.0-plugins-good</exec_depend> -->
+
+  <depend>libgstreamer1.0-dev</depend>
+  <depend>libgstreamer-plugins-base1.0-dev</depend>
+  <depend>libgstreamer-plugins-bad1.0-dev</depend>
+  <depend>gstreamer1.0-plugins-base</depend>
+  <depend>gstreamer1.0-plugins-good</depend>
+  <depend>gstreamer1.0-plugins-bad</depend>
+  <depend>gstreamer1.0-plugins-ugly</depend>
+  <depend>gstreamer1.0-libav</depend>
+  <depend>gstreamer1.0-tools</depend>
+  <depend>gstreamer1.0-x</depend>
+  <depend>gstreamer1.0-alsa</depend>
+  <depend>gstreamer1.0-gl</depend>
+  <depend>gstreamer1.0-gtk</depend>
+  <depend>gstreamer1.0-qt5</depend>
+  <depend>gstreamer1.0-pulseaudio</depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>

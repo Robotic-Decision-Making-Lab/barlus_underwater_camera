@@ -1,4 +1,4 @@
-gstreamer_proxy_parameters:
+gstreamer_proxy:
   stream_address:
     type: string
     default_value: rtsp://192.168.1.17:8554/barlus
@@ -12,12 +12,12 @@ gstreamer_proxy_parameters:
   frame:
     height:
       type: int
-      default_value: 1080
+      default_value: 2048
       description: The height of the frame.
 
     width:
       type: int
-      default_value: 1920
+      default_value: 3072
       description: The width of the frame.
 
   camera_matrix:

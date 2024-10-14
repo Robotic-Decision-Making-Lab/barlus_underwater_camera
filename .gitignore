@@ -5,3 +5,5 @@ log
 
 # virtualenv
 .venv
+
+__pycache__/

@@ -14,10 +14,10 @@
 
   <author>Evan Palmer</author>
 
-  <depend>sensor_msgs</depend>
-  <depend>python3-numpy</depend>
-  <depend>cv_bridge</depend>
   <depend>generate_parameter_library</depend>
+  <depend>sensor_msgs</depend>
+  <depend>rclcpp_components</depend>
+  <depend>cv_bridge</depend>
 
   <export>
     <build_type>ament_python</build_type>
