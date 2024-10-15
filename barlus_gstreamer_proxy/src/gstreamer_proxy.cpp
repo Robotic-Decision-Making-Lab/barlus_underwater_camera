@@ -144,7 +144,11 @@ auto GStreamerProxy::configure_stream() -> bool
 
       *self->camera_info_ = self->camera_info_manager_->getCameraInfo();
       self->camera_info_->header.stamp = self->now();
-      self->camera_pub_->publish(cv_mat_to_ros_image(image), *self->camera_info_);
+
+      sensor_msgs::msg::Image image_msg = cv_mat_to_ros_image(image);
+      image_msg.header = self->camera_info_->header;
+
+      self->camera_pub_->publish(image_msg, *self->camera_info_);
 
       gst_sample_unref(sample);
 

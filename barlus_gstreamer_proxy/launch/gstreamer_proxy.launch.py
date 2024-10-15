@@ -49,12 +49,28 @@ def generate_launch_description():
         extra_arguments=[{"use_intra_process_comms": True}],
     )
 
+    rectify_node = ComposableNode(
+        package="image_proc",
+        plugin="image_proc::RectifyNode",
+        name="rectify_node",
+        namespace=LaunchConfiguration("ns"),
+        remappings=[("image", "image_raw")],
+    )
+
+    debayer_node = ComposableNode(
+        package="image_proc",
+        plugin="image_proc::DebayerNode",
+        namespace=LaunchConfiguration("ns"),
+        name="debayer_node",
+        remappings=[("image_raw", "image_raw")],
+    )
+
     container = ComposableNodeContainer(
         name="barlus_container",
         namespace="",
         package="rclcpp_components",
         executable="component_container",
-        composable_node_descriptions=[gstreamer_proxy_node],
+        composable_node_descriptions=[gstreamer_proxy_node, rectify_node, debayer_node],
     )
 
     return LaunchDescription([declare_parameters_file, declare_ns, container])
