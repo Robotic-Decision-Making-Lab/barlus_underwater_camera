@@ -1,26 +1,72 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.24)
 project(barlus_gstreamer_proxy)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  add_compile_options(-Wall -Wextra -Wpedantic)
+    add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
-# find dependencies
+include(GNUInstallDirs)
+
+set(THIS_PACKAGE_INCLUDE_DEPENDS
+    rclcpp
+    rclcpp_lifecycle
+    geometry_msgs
+    rclcpp_components
+    cv_bridge
+)
+
+foreach(pkg IN ITEMS ${THIS_PACKAGE_INCLUDE_DEPENDS})
+    find_package(${pkg} REQUIRED)
+endforeach()
+
 find_package(ament_cmake REQUIRED)
-# uncomment the following section in order to fill in
-# further dependencies manually.
-# find_package(<dependency> REQUIRED)
+find_package(generate_parameter_library REQUIRED)
 
-if(BUILD_TESTING)
-  find_package(ament_lint_auto REQUIRED)
-  # the following line skips the linter which checks for copyrights
-  # comment the line when a copyright and license is added to all source files
-  set(ament_cmake_copyright_FOUND TRUE)
-  # the following line skips cpplint (only works in a git repo)
-  # comment the line when this package is in a git repo and when
-  # a copyright and license is added to all source files
-  set(ament_cmake_cpplint_FOUND TRUE)
-  ament_lint_auto_find_test_dependencies()
-endif()
+find_package(PkgConfig REQUIRED)
+pkg_search_module(gstreamer REQUIRED IMPORTED_TARGET gstreamer-1.0)
+pkg_search_module(gstreamer-app REQUIRED IMPORTED_TARGET gstreamer-app-1.0)
+
+generate_parameter_library(gstreamer_proxy_parameters
+    src/gstreamer_proxy_parameters.yaml
+)
+
+add_library(gstreamer_proxy_library SHARED)
+
+target_sources(
+    gstreamer_proxy_library
+    PRIVATE src/gstreamer_proxy.cpp
+    PUBLIC
+        FILE_SET HEADERS
+        BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include
+        FILES
+            ${CMAKE_CURRENT_SOURCE_DIR}/include/barlus_gstreamer_proxy/gstreamer_proxy.hpp
+)
+target_link_libraries(
+    gstreamer_proxy_library
+    PRIVATE gstreamer_proxy_parameters
+    PUBLIC PkgConfig::gstreamer
+    PUBLIC PkgConfig::gstreamer-app
+)
+ament_target_dependencies(gstreamer_proxy_library PUBLIC ${THIS_PACKAGE_INCLUDE_DEPENDS})
+target_compile_features(gstreamer_proxy_library PUBLIC cxx_std_20)
+
+rclcpp_components_register_node(gstreamer_proxy_library
+    PLUGIN "barlus::GStreamerProxy"
+    EXECUTABLE gstreamer_proxy
+)
+
+install(
+    TARGETS gstreamer_proxy_library gstreamer_proxy_parameters
+    EXPORT export_gstreamer_proxy_library
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    FILE_SET HEADERS
+)
+
+install(DIRECTORY config launch DESTINATION share/barlus_gstreamer_proxy)
+
+ament_export_targets(export_gstreamer_proxy_library HAS_LIBRARY_TARGET)
+ament_export_dependencies($THIS_PACKAGE_INCLUDE_DEPENDS)
 
 ament_package()

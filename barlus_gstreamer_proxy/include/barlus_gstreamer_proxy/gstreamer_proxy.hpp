@@ -46,7 +46,7 @@ public:
 
   auto on_configure(const rclcpp_lifecycle::State & state) -> CallbackReturn override;
 
-  auto on_shutdown(const rclcpp_lifecycle::State & state) -> CallbackReturn override;
+  auto on_cleanup(const rclcpp_lifecycle::State & state) -> CallbackReturn override;
 
 private:
   std::shared_ptr<gstreamer_proxy::ParamListener> param_listener_;
