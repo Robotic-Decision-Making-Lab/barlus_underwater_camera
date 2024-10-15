@@ -13,6 +13,8 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
     geometry_msgs
     rclcpp_components
     cv_bridge
+    camera_info_manager
+    image_transport
 )
 
 foreach(pkg IN ITEMS ${THIS_PACKAGE_INCLUDE_DEPENDS})

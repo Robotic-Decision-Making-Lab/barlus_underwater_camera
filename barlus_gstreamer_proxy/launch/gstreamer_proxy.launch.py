@@ -31,7 +31,7 @@ from lifecycle_msgs.msg import Transition
 
 
 def generate_launch_description():
-    declare_ns = DeclareLaunchArgument("ns", default_value="")
+    declare_ns = DeclareLaunchArgument("ns", default_value="/barlus")
     declare_parameters_file = DeclareLaunchArgument(
         "parameters_file",
         default_value=PathJoinSubstitution(
@@ -50,6 +50,10 @@ def generate_launch_description():
         namespace=LaunchConfiguration("ns"),
         output="screen",
         parameters=[LaunchConfiguration("parameters_file")],
+        remappings=[
+            ("/image_raw", [LaunchConfiguration("ns"), "/image_raw"]),
+            ("/camera_info", [LaunchConfiguration("ns"), "/camera_info"]),
+        ],
     )
 
     configure_event = EmitEvent(

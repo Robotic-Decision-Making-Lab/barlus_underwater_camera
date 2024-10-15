@@ -76,8 +76,8 @@ auto GStreamerProxy::on_configure(const rclcpp_lifecycle::State & /*state*/) -> 
     return CallbackReturn::ERROR;
   }
 
-  image_pub_ = create_publisher<sensor_msgs::msg::Image>("/barlus/image_raw", rclcpp::SystemDefaultsQoS());
-  camera_info_pub_ = create_publisher<sensor_msgs::msg::CameraInfo>("/barlus/camera_info", rclcpp::SystemDefaultsQoS());
+  image_pub_ = create_publisher<sensor_msgs::msg::Image>("/image_raw", rclcpp::SystemDefaultsQoS());
+  camera_info_pub_ = create_publisher<sensor_msgs::msg::CameraInfo>("/camera_info", rclcpp::SystemDefaultsQoS());
 
   gst_init(nullptr, nullptr);
 
@@ -109,12 +109,6 @@ auto GStreamerProxy::on_configure(const rclcpp_lifecycle::State & /*state*/) -> 
   gst_app_sink_set_emit_signals(GST_APP_SINK_CAST(sink), static_cast<gboolean>(true));
   gst_app_sink_set_drop(GST_APP_SINK_CAST(sink), static_cast<gboolean>(true));
   gst_app_sink_set_max_buffers(GST_APP_SINK_CAST(sink), 1);
-
-  const GstStateChangeReturn ret = gst_element_set_state(pipeline_, GST_STATE_PLAYING);
-  if (ret == GST_STATE_CHANGE_FAILURE) {
-    RCLCPP_ERROR(get_logger(), "Failed to start GStreamer pipeline");
-    return CallbackReturn::ERROR;
-  }
 
   // Set the callbacks for the appsink
   GstAppSinkCallbacks callbacks = {
@@ -153,14 +147,29 @@ auto GStreamerProxy::on_configure(const rclcpp_lifecycle::State & /*state*/) -> 
     this);
   gst_object_unref(bus);
 
-  RCLCPP_INFO(get_logger(), "GStreamer pipeline created successfully");  // NOLINT
+  RCLCPP_INFO(get_logger(), "GStreamer pipeline configured successfully");  // NOLINT
 
   return CallbackReturn::SUCCESS;
 }
 
-auto GStreamerProxy::on_cleanup(const rclcpp_lifecycle::State & /*state*/) -> CallbackReturn
+auto GStreamerProxy::on_activate(const rclcpp_lifecycle::State & /*state*/) -> CallbackReturn
+{
+  const GstStateChangeReturn ret = gst_element_set_state(pipeline_, GST_STATE_PLAYING);
+  if (ret == GST_STATE_CHANGE_FAILURE) {
+    RCLCPP_ERROR(get_logger(), "Failed to start GStreamer pipeline");
+    return CallbackReturn::ERROR;
+  }
+  return CallbackReturn::SUCCESS;
+}
+
+auto GStreamerProxy::on_deactivate(const rclcpp_lifecycle::State & /*state*/) -> CallbackReturn
 {
   gst_element_set_state(pipeline_, GST_STATE_NULL);
+  return CallbackReturn::SUCCESS;
+}
+
+auto GStreamerProxy::on_shutdown(const rclcpp_lifecycle::State & /*state*/) -> CallbackReturn
+{
   gst_object_unref(pipeline_);
   return CallbackReturn::SUCCESS;
 }
