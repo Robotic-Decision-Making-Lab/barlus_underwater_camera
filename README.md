@@ -65,8 +65,18 @@ messages. After building `barlus_gstreamer_proxy`, the node can be launched
 using
 
 ```bash
-ros2 launch barlus_gstreamer_proxy gstreamer_proxy.launch.yaml
+ros2 launch barlus_gstreamer_proxy gstreamer_proxy.launch.py
 ```
 
 The frames will be published to the topic `/barlus/image_raw`. The camera
 intrinsics are available on the topic `/barlus/camera_info`.
+
+## Camera calibration
+
+The camera intrinsics can be retrieved using the [camera_calibration](https://docs.ros.org/en/rolling/p/camera_calibration/index.html)
+node. For example, to calibrate the camera using an 8x6 chessboard, run the
+following:
+
+```bash
+ros2 run camera_calibration cameracalibrator --size 8x6 --square 0.108 image:=/barlus/image_mono camera:=/barlus --no-service-check
+```
