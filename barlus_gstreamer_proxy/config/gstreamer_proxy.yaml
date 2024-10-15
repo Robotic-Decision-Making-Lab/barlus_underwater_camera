@@ -1,7 +1,7 @@
 /barlus/gstreamer_proxy:
   ros__parameters:
     stream_address: rtsp://192.168.1.17:8554/barlus
-    camera_info_url: package://barlus_gstreamer_proxy/config/camera_info.yaml
+    camera_info_url: package://barlus_gstreamer_proxy/config/camera_info_underwater.yaml
     frame_id: camera_link
     image_width: 3072
     image_height: 2048
