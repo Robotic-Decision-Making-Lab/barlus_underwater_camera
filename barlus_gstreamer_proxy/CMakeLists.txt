@@ -9,7 +9,6 @@ include(GNUInstallDirs)
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
     rclcpp
-    rclcpp_lifecycle
     geometry_msgs
     rclcpp_components
     cv_bridge

@@ -20,18 +20,15 @@
 
 
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, EmitEvent, RegisterEventHandler
-from launch.events import matches_action
+from launch.actions import DeclareLaunchArgument
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
-from launch_ros.actions import LifecycleNode
-from launch_ros.event_handlers import OnStateTransition
-from launch_ros.events.lifecycle import ChangeState
+from launch_ros.actions import ComposableNodeContainer
+from launch_ros.descriptions import ComposableNode
 from launch_ros.substitutions import FindPackageShare
-from lifecycle_msgs.msg import Transition
 
 
 def generate_launch_description():
-    declare_ns = DeclareLaunchArgument("ns", default_value="/barlus")
+    declare_ns = DeclareLaunchArgument("ns", default_value="barlus")
     declare_parameters_file = DeclareLaunchArgument(
         "parameters_file",
         default_value=PathJoinSubstitution(
@@ -43,48 +40,21 @@ def generate_launch_description():
         ),
     )
 
-    gstreamer_proxy_node = LifecycleNode(
+    gstreamer_proxy_node = ComposableNode(
         package="barlus_gstreamer_proxy",
-        executable="gstreamer_proxy",
-        name="gstreamer_proxy",
+        plugin="barlus::GStreamerProxy",
         namespace=LaunchConfiguration("ns"),
-        output="screen",
+        name="gstreamer_proxy",
         parameters=[LaunchConfiguration("parameters_file")],
-        remappings=[
-            ("/image_raw", [LaunchConfiguration("ns"), "/image_raw"]),
-            ("/camera_info", [LaunchConfiguration("ns"), "/camera_info"]),
-        ],
+        extra_arguments=[{"use_intra_process_comms": True}],
     )
 
-    configure_event = EmitEvent(
-        event=ChangeState(
-            lifecycle_node_matcher=matches_action(gstreamer_proxy_node),
-            transition_id=Transition.TRANSITION_CONFIGURE,
-        )
+    container = ComposableNodeContainer(
+        name="barlus_container",
+        namespace="",
+        package="rclcpp_components",
+        executable="component_container",
+        composable_node_descriptions=[gstreamer_proxy_node],
     )
 
-    activate_event = RegisterEventHandler(
-        OnStateTransition(
-            target_lifecycle_node=gstreamer_proxy_node,
-            start_state="configuring",
-            goal_state="inactive",
-            entities=[
-                EmitEvent(
-                    event=ChangeState(
-                        lifecycle_node_matcher=matches_action(gstreamer_proxy_node),
-                        transition_id=Transition.TRANSITION_ACTIVATE,
-                    )
-                )
-            ],
-        )
-    )
-
-    return LaunchDescription(
-        [
-            declare_parameters_file,
-            declare_ns,
-            gstreamer_proxy_node,
-            configure_event,
-            activate_event,
-        ]
-    )
+    return LaunchDescription([declare_parameters_file, declare_ns, container])
