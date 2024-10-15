@@ -59,23 +59,22 @@ ffmpeg -i rtsp://<your-ip-address>:<mediamtx-port>/barlus -c:v copy -an recordin
 
 ## ROS 2 interface
 
-`barlus_gstreamer_proxy`, a light wrapper around GStreamer has been implemented
-to convert frames received from the camera into ROS 2 `sensor_msgs/Image`
-messages. After building `barlus_gstreamer_proxy`, the node can be launched
-using
+`barlus_gstreamer_proxy` has been implemented to convert frames received from
+the camera into ROS 2 `sensor_msgs/Image` messages using GStreamer. After
+building `barlus_gstreamer_proxy`, the node can be launched using
 
 ```bash
 ros2 launch barlus_gstreamer_proxy gstreamer_proxy.launch.py
 ```
 
-The frames will be published to the topic `/barlus/image_raw`. The camera
+The raw frames will be published to the topic `/barlus/image_raw`. The camera
 intrinsics are available on the topic `/barlus/camera_info`.
 
 ## Camera calibration
 
 The camera intrinsics can be retrieved using the [camera_calibration](https://docs.ros.org/en/rolling/p/camera_calibration/index.html)
-node. For example, to calibrate the camera using an 8x6 chessboard, run the
-following:
+node. For example, to calibrate the camera using an [8x6 chessboard](https://wiki.ros.org/camera_calibration/Tutorials/MonocularCalibration?action=AttachFile&do=view&target=check-108.pdf),
+run the following:
 
 ```bash
 ros2 run camera_calibration cameracalibrator --size 8x6 --square 0.108 image:=/barlus/image_mono camera:=/barlus --no-service-check
