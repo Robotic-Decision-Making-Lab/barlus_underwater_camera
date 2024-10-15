@@ -9,19 +9,19 @@
     "target": "desktop"
   },
   "runArgs": [
-    "--network=host",
-    "--cap-add=SYS_PTRACE",
-    "--security-opt=seccomp:unconfined",
-    "--security-opt=apparmor:unconfined",
-    "--volume=/dev:/dev",
-    "--privileged",
-    "--volume=/run/user/1000:/run/user/1000"
+		"--network=host",
+		"--cap-add=SYS_PTRACE",
+		"--security-opt=seccomp:unconfined",
+		"--security-opt=apparmor:unconfined",
+		"--volume=/tmp/.X11-unix:/tmp/.X11-unix",
+		"--ipc=host"
   ],
   "containerEnv": {
-    "DISPLAY": "${localEnv:DISPLAY}",
-    "WAYLAND_DISPLAY": "${localEnv:WAYLAND_DISPLAY}",
-    "XDG_RUNTIME_DIR": "${localEnv:XDG_RUNTIME_DIR}",
-    "PULSE_SERVER": "${localEnv:PULSE_SERVER}"
+		"DISPLAY": "${localEnv:DISPLAY}",
+		"WAYLAND_DISPLAY": "${localEnv:WAYLAND_DISPLAY}",
+		"XDG_RUNTIME_DIR": "${localEnv:XDG_RUNTIME_DIR}",
+		"PULSE_SERVER": "${localEnv:PULSE_SERVER}",
+		"LIBGL_ALWAYS_SOFTWARE": "1"
   },
   "customizations": {
     "vscode": {

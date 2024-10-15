@@ -1,0 +1,21 @@
+# Camera intrinsics for the Barlus UW-S5-3PBX10 out of water.
+image_width: 3072
+image_height: 2048
+camera_name: barlus
+camera_matrix:
+  rows: 3
+  cols: 3
+  data: [1841.023501, 0.000000, 1572.832467, 0.000000, 1636.457348, 980.425154, 0.000000, 0.000000, 1.000000]
+distortion_model: plumb_bob
+distortion_coefficients:
+  rows: 1
+  cols: 5
+  data: [-0.339342, 0.085981, 0.000070, -0.000437, 0.000000]
+rectification_matrix:
+  rows: 3
+  cols: 3
+  data: [1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000]
+projection_matrix:
+  rows: 3
+  cols: 4
+  data: [1277.232422, 0.000000, 1580.600641, 0.000000, 0.000000, 1367.291748, 959.638436, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000]
