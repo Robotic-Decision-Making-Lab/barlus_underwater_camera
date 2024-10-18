@@ -86,7 +86,7 @@ GStreamerProxy::GStreamerProxy(const rclcpp::NodeOptions & options)
   }
 
   camera_pub_ = std::make_shared<image_transport::CameraPublisher>(
-    image_transport::create_camera_publisher(this, "image_raw", rclcpp::QoS{100}.get_rmw_qos_profile()));
+    image_transport::create_camera_publisher(this, "image_raw", rclcpp::QoS{10}.get_rmw_qos_profile()));
 
   if (!configure_stream()) {
     shutdown_stream();
@@ -104,7 +104,7 @@ auto GStreamerProxy::configure_stream() -> bool
   RCLCPP_INFO(get_logger(), "Starting GStreamer pipeline with address: %s", params_.stream_address.c_str());  // NOLINT
 
   // The following configurations are intended for low-latency transport
-  const std::string video_source = "rtspsrc location=" + params_.stream_address;
+  const std::string video_source = "rtspsrc location=" + params_.stream_address + " latency=0";
   const std::string video_codec = "! rtph264depay ! h264parse ! avdec_h264";
   const std::string video_decode = "! decodebin ! videoconvert ! video/x-raw,format=(string)BGR";
   const std::string video_sink_conf = "! queue ! appsink emit-signals=true sync=false max-buffers=1 drop=true";
