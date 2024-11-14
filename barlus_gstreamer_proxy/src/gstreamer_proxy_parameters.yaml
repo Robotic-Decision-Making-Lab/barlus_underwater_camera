@@ -6,7 +6,7 @@ gstreamer_proxy:
 
   stream_address:
     type: string
-    default_value: rtsp://192.168.1.17:8554/barlus
+    default_value: rtsp://192.168.1.10:554/user=admin&password=&channel=1&stream=0.sdp
     description: The RTSP stream address. This can be either the stream from the camera itself or from MediaMTX.
 
   camera_info_url:
