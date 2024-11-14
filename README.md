@@ -22,6 +22,18 @@ Netmask: 255.255.255.0
 Gateway: 192.168.1.1
 ```
 
+After establishing a connection, verify the RTSP stream using FFmpeg
+
+```bash
+ffplay -fflags nobuffer -flags low_delay -probesize 32 -rtsp_transport tcp -i "rtsp://192.168.1.10:554/user=admin&password=&channel=1&stream=0.sdp?"
+```
+
+The stream can also be recorded using
+
+```bash
+ffmpeg -i "rtsp://192.168.1.10:554/user=admin&password=&channel=1&stream=0.sdp?" -c:v copy -an recording.mp4
+```
+
 ## Using MediaMTX proxy
 
 MediaMTX can be used to connect to the RTSP server embedded into the camera to
@@ -42,19 +54,7 @@ docker compose up
 Once running, the stream can be played using FFmpeg
 
 ```bash
-ffplay rtsp://<your-ip-address>:<mediamtx-port>/barlus
-```
-
-For low latency FFmpeg streaming, run the following
-
-```bash
 ffplay  -fflags nobuffer -flags low_delay -probesize 32 -rtsp_transport udp -i rtsp://<your-ip-address>:<mediamtx-port>/barlus
-```
-
-The stream can also be recorded using
-
-```bash
-ffmpeg -i rtsp://<your-ip-address>:<mediamtx-port>/barlus -c:v copy -an recording.mp4
 ```
 
 ## ROS 2 interface
