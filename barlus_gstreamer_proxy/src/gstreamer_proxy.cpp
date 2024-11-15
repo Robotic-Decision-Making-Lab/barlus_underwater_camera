@@ -86,7 +86,7 @@ GStreamerProxy::GStreamerProxy(const rclcpp::NodeOptions & options)
   }
 
   camera_pub_ = std::make_shared<image_transport::CameraPublisher>(
-    image_transport::create_camera_publisher(this, "image_raw", rclcpp::QoS{100}.get_rmw_qos_profile()));
+    image_transport::create_camera_publisher(this, "image_raw", rclcpp::QoS{10}.get_rmw_qos_profile()));
 
   if (!configure_stream()) {
     shutdown_stream();

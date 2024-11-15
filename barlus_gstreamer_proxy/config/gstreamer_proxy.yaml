@@ -1,6 +1,5 @@
 /barlus/gstreamer_proxy:
   ros__parameters:
-
     # The default RTSP stream address for the Barlus UW-S5-3PBX10 underwater camera.
     # If using MediaMTX, this should be the address of the MediaMTX server, e.g.,
     # stream_address: rtsp://192.168.1.17:8554/barlus
