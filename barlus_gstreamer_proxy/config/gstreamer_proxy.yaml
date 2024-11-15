@@ -2,8 +2,8 @@
   ros__parameters:
     # The default RTSP stream address for the Barlus UW-S5-3PBX10 underwater camera.
     # If using MediaMTX, this should be the address of the MediaMTX server, e.g.,
-    # stream_address: rtsp://192.168.1.17:8554/barlus
-    stream_address: rtsp://192.168.1.10:554/user=admin&password=&channel=1&stream=0.sdp
+    stream_address: rtsp://192.168.2.17:8554/barlus
+    # stream_address: rtsp://192.168.1.10:554/user=admin&password=&channel=1&stream=0.sdp
 
     # The path to the camera info file. This file contains the camera calibration information.
     camera_info_url: package://barlus_gstreamer_proxy/config/camera_info_underwater.yaml
@@ -19,3 +19,9 @@
 
     # The name of the camera.
     camera_name: barlus
+
+/barlus/track_marker_node:
+  ros__parameters:
+    dictionary: 8
+    marker_id: 0
+    marker_size: 0.098

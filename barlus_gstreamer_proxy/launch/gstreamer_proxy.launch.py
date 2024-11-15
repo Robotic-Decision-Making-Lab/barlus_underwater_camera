@@ -65,12 +65,22 @@ def generate_launch_description():
         remappings=[("image_raw", "image_raw")],
     )
 
+    track_marker_node = ComposableNode(
+        package="image_proc",
+        plugin="image_proc::TrackMarkerNode",
+        namespace=LaunchConfiguration("ns"),
+        name="track_marker_node",
+        parameters=[LaunchConfiguration("parameters_file")],
+        remappings=[("image", "image_raw")],
+        # remappings=[("image", "image_mono")],
+    )
+
     container = ComposableNodeContainer(
         name="barlus_container",
         namespace="",
         package="rclcpp_components",
         executable="component_container",
-        composable_node_descriptions=[gstreamer_proxy_node, rectify_node, debayer_node],
+        composable_node_descriptions=[gstreamer_proxy_node, track_marker_node],
     )
 
     return LaunchDescription([declare_parameters_file, declare_ns, container])
