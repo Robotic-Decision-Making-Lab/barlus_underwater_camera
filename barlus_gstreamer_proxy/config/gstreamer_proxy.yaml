@@ -7,7 +7,7 @@
     stream_address: rtsp://192.168.1.10:554/user=admin&password=&channel=1&stream=0.sdp
 
     # The path to the camera info file. This file contains the camera calibration information.
-    camera_info_url: package://barlus_gstreamer_proxy/config/camera_info_underwater.yaml
+    camera_info_url: package://barlus_gstreamer_proxy/config/camera_info.yaml
 
     # The frame ID of the camera.
     frame_id: camera_link
