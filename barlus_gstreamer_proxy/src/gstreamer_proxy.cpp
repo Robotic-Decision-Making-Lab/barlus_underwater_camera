@@ -28,27 +28,6 @@ namespace barlus
 namespace
 {
 
-/// Convert a GStreamer sample to a cv::Mat image
-auto gst_to_cv_mat(GstSample * sample) -> cv::Mat
-{
-  GstCaps * caps = gst_sample_get_caps(sample);
-  GstBuffer * buffer = gst_sample_get_buffer(sample);
-  GstStructure * structure = gst_caps_get_structure(caps, 0);
-
-  int width;
-  int height;
-  gst_structure_get_int(structure, "width", &width);
-  gst_structure_get_int(structure, "height", &height);
-
-  GstMapInfo map;
-  gst_buffer_map(buffer, &map, GST_MAP_READ);
-
-  cv::Mat image(height, width, CV_8UC3, map.data);
-  gst_buffer_unmap(buffer, &map);
-
-  return image;
-}
-
 /// Convert a cv::Mat to a sensor_msgs::msg::Image
 auto cv_mat_to_ros_image(const cv::Mat & image) -> sensor_msgs::msg::Image
 {
