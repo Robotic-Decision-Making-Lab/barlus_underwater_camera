@@ -35,18 +35,19 @@ target_sources(
             ${CMAKE_CURRENT_SOURCE_DIR}/include/barlus_image_pipeline/image_proxy.hpp
 )
 target_compile_features(image_proxy_component PUBLIC cxx_std_23)
-target_link_libraries(image_proxy_component
-  PRIVATE image_proxy_parameters
-  PUBLIC
-    PkgConfig::gstreamer
-    PkgConfig::gstreamer-app
-    rclcpp::rclcpp
-    rclcpp_components::component
-    cv_bridge::cv_bridge
-    camera_info_manager::camera_info_manager
-    image_transport::image_transport
-    ${geometry_msgs_TARGETS}
-    ${OpenCV_LIBS}
+target_link_libraries(
+    image_proxy_component
+    PRIVATE image_proxy_parameters
+    PUBLIC
+        PkgConfig::gstreamer
+        PkgConfig::gstreamer-app
+        rclcpp::rclcpp
+        rclcpp_components::component
+        cv_bridge::cv_bridge
+        camera_info_manager::camera_info_manager
+        image_transport::image_transport
+        ${geometry_msgs_TARGETS}
+        ${OpenCV_LIBS}
 )
 
 rclcpp_components_register_node(image_proxy_component
@@ -66,19 +67,20 @@ target_sources(
             ${CMAKE_CURRENT_SOURCE_DIR}/include/barlus_image_pipeline/track_markers.hpp
 )
 target_compile_features(track_markers_component PUBLIC cxx_std_23)
-target_link_libraries(track_markers_component
-  PRIVATE track_markers_parameters
-  PUBLIC
-    PkgConfig::gstreamer
-    PkgConfig::gstreamer-app
-    rclcpp::rclcpp
-    rclcpp_components::component
-    cv_bridge::cv_bridge
-    camera_info_manager::camera_info_manager
-    tf2_geometry_msgs::tf2_geometry_msgs
-    tf2::tf2
-    ${geometry_msgs_TARGETS}
-    ${OpenCV_LIBS}
+target_link_libraries(
+    track_markers_component
+    PRIVATE track_markers_parameters
+    PUBLIC
+        PkgConfig::gstreamer
+        PkgConfig::gstreamer-app
+        rclcpp::rclcpp
+        rclcpp_components::component
+        cv_bridge::cv_bridge
+        camera_info_manager::camera_info_manager
+        tf2_geometry_msgs::tf2_geometry_msgs
+        tf2::tf2
+        ${geometry_msgs_TARGETS}
+        ${OpenCV_LIBS}
 )
 
 rclcpp_components_register_node(track_markers_component
