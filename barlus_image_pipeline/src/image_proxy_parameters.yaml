@@ -1,4 +1,4 @@
-gstreamer_proxy:
+image_proxy_node:
   camera_name:
     type: string
     default_value: barlus

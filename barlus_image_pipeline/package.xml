@@ -2,9 +2,9 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
 
-  <name>barlus_gstreamer_proxy</name>
+  <name>barlus_image_pipeline</name>
   <version>0.0.1</version>
-  <description>A light wrapper around GStreamer to convert the camera stream into a ROS 2 feed</description>
+  <description>Nodes used to process a stream from a Barlus underwater camera</description>
 
   <maintainer email="evanp922@gmail.com">Evan Palmer</maintainer>
   <license>MIT</license>
@@ -14,15 +14,16 @@
 
   <author>Evan Palmer</author>
 
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
   <depend>generate_parameter_library</depend>
   <depend>sensor_msgs</depend>
   <depend>rclcpp_components</depend>
   <depend>cv_bridge</depend>
   <depend>camera_info_manager</depend>
   <depend>image_transport</depend>
-
-  <exec_depend>image_proc</exec_depend>
-  <exec_depend>camera_calibration</exec_depend>
+  <depend>tf2</depend>
+  <depend>tf2_geometry_msgs</depend>
 
   <export>
     <build_type>ament_cmake</build_type>

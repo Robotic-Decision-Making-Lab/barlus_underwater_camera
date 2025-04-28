@@ -1,4 +1,4 @@
-# Copyright 2024, Evan Palmer
+# Copyright 2025, Evan Palmer
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -32,37 +32,17 @@ def generate_launch_description():
     declare_parameters_file = DeclareLaunchArgument(
         "parameters_file",
         default_value=PathJoinSubstitution(
-            [
-                FindPackageShare("barlus_gstreamer_proxy"),
-                "config",
-                "gstreamer_proxy.yaml",
-            ]
+            [FindPackageShare("barlus_image_pipeline"), "config", "track_markers.yaml"]
         ),
     )
 
-    gstreamer_proxy_node = ComposableNode(
-        package="barlus_gstreamer_proxy",
-        plugin="barlus::GStreamerProxy",
+    track_markers_node = ComposableNode(
+        package="barlus_image_pipeline",
+        plugin="barlus::TrackMarkersNode",
         namespace=LaunchConfiguration("ns"),
-        name="gstreamer_proxy",
+        name="track_markers_node",
         parameters=[LaunchConfiguration("parameters_file")],
         extra_arguments=[{"use_intra_process_comms": True}],
-    )
-
-    rectify_node = ComposableNode(
-        package="image_proc",
-        plugin="image_proc::RectifyNode",
-        name="rectify_node",
-        namespace=LaunchConfiguration("ns"),
-        remappings=[("image", "image_raw")],
-    )
-
-    debayer_node = ComposableNode(
-        package="image_proc",
-        plugin="image_proc::DebayerNode",
-        namespace=LaunchConfiguration("ns"),
-        name="debayer_node",
-        remappings=[("image_raw", "image_raw")],
     )
 
     container = ComposableNodeContainer(
@@ -70,7 +50,7 @@ def generate_launch_description():
         namespace="",
         package="rclcpp_components",
         executable="component_container",
-        composable_node_descriptions=[gstreamer_proxy_node, rectify_node, debayer_node],
+        composable_node_descriptions=[track_markers_node],
     )
 
     return LaunchDescription([declare_parameters_file, declare_ns, container])
