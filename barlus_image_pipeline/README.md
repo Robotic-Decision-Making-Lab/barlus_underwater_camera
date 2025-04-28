@@ -23,3 +23,7 @@ the detected poses and not the video feed in the ROS network.
 > The track_markers_node is not compatible with the image_proxy_node. If you
 > need to perform pose detection with a ROS 2 video feed, then you should use
 > the [image_proc::TrackMarkerNode](https://github.com/ros-perception/image_pipeline/blob/rolling/image_proc/include/image_proc/track_marker.hpp).
+
+### Plugin
+
+barlus::TrackMarkersNode
