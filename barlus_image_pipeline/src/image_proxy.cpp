@@ -18,60 +18,20 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#include "barlus_gstreamer_proxy/gstreamer_proxy.hpp"
+#include "barlus_image_pipeline/image_proxy.hpp"
 
 #include <gst/app/app.h>
+
+#include "common.hpp"
 
 namespace barlus
 {
 
-namespace
+ImageProxyNode::ImageProxyNode(const rclcpp::NodeOptions & options)
+: Node("image_proxy_node", options)
 {
-
-/// Convert a GStreamer sample to a cv::Mat image
-auto gst_to_cv_mat(GstSample * sample) -> cv::Mat
-{
-  GstCaps * caps = gst_sample_get_caps(sample);
-  GstBuffer * buffer = gst_sample_get_buffer(sample);
-  GstStructure * structure = gst_caps_get_structure(caps, 0);
-
-  int width;
-  int height;
-  gst_structure_get_int(structure, "width", &width);
-  gst_structure_get_int(structure, "height", &height);
-
-  GstMapInfo map;
-  gst_buffer_map(buffer, &map, GST_MAP_READ);
-
-  cv::Mat image(height, width, CV_8UC3, map.data);
-  gst_buffer_unmap(buffer, &map);
-
-  return image;
-}
-
-/// Convert a cv::Mat to a sensor_msgs::msg::Image
-auto cv_mat_to_ros_image(const cv::Mat & image) -> sensor_msgs::msg::Image
-{
-  cv_bridge::CvImage cv_image;
-  cv_image.image = image;
-  cv_image.encoding = "bgr8";
-  return *cv_image.toImageMsg();
-}
-
-}  // namespace
-
-GStreamerProxy::GStreamerProxy(const rclcpp::NodeOptions & options)
-: Node("gstreamer_proxy", options)
-{
-  try {
-    param_listener_ = std::make_shared<gstreamer_proxy::ParamListener>(get_node_parameters_interface());
-    params_ = param_listener_->get_params();
-  }
-  catch (const std::exception & e) {
-    RCLCPP_ERROR(get_logger(), "Failed to get GStreamerProxy parameters: %s", e.what());  // NOLINT
-    rclcpp::shutdown();
-    return;
-  }
+  param_listener_ = std::make_shared<image_proxy_node::ParamListener>(get_node_parameters_interface());
+  params_ = param_listener_->get_params();
 
   camera_info_ = std::make_unique<sensor_msgs::msg::CameraInfo>();
   camera_info_manager_ =
@@ -95,24 +55,17 @@ GStreamerProxy::GStreamerProxy(const rclcpp::NodeOptions & options)
   }
 }
 
-GStreamerProxy::~GStreamerProxy() { shutdown_stream(); }
+ImageProxyNode::~ImageProxyNode() { shutdown_stream(); }
 
-auto GStreamerProxy::configure_stream() -> bool
+auto ImageProxyNode::configure_stream() -> bool
 {
   gst_init(nullptr, nullptr);
 
   RCLCPP_INFO(get_logger(), "Starting GStreamer pipeline with address: %s", params_.stream_address.c_str());  // NOLINT
 
-  // The following configurations are intended for low-latency transport
-  const std::string video_source = "rtspsrc location=" + params_.stream_address + " protocols=tcp";
-  const std::string video_codec = "! rtph264depay ! h264parse ! avdec_h264";
-  const std::string video_decode = "! decodebin ! videoconvert ! video/x-raw,format=(string)BGR";
-  const std::string video_sink_conf = "! queue ! appsink emit-signals=true sync=false max-buffers=1 drop=true";
-  const std::string command = video_source + " " + video_codec + " " + video_decode + " " + video_sink_conf;
-
-  // Create GStreamer pipeline
+  // create GStreamer pipeline
   GError * error = nullptr;
-  pipeline_ = gst_parse_launch(command.c_str(), &error);
+  pipeline_ = gst_parse_launch(make_gst_command(params_.stream_address).c_str(), &error);
 
   if (error != nullptr) {
     RCLCPP_ERROR(get_logger(), "Failed to create GStreamer pipeline. %s", error->message);  // NOLINT
@@ -120,9 +73,8 @@ auto GStreamerProxy::configure_stream() -> bool
     return false;
   }
 
-  // Configure appsink
+  // configure appsink
   GstElement * sink = gst_bin_get_by_name(GST_BIN(pipeline_), "appsink0");  // NOLINT(bugprone-casting-through-void)
-
   if (sink == nullptr) {
     RCLCPP_ERROR(get_logger(), "Failed to get appsink from the pipeline");
     return false;
@@ -132,12 +84,12 @@ auto GStreamerProxy::configure_stream() -> bool
   gst_app_sink_set_drop(GST_APP_SINK_CAST(sink), static_cast<gboolean>(true));
   gst_app_sink_set_max_buffers(GST_APP_SINK_CAST(sink), 1);
 
-  // Set the callbacks for the appsink
+  // set the callbacks for the appsink
   GstAppSinkCallbacks callbacks = {
     nullptr,                                                                                     // eos
     [](GstAppSink * /*sink*/, gpointer /*user_data*/) -> GstFlowReturn { return GST_FLOW_OK; },  // new_preroll
     [](GstAppSink * sink, gpointer user_data) -> GstFlowReturn {                                 // new_sample
-      auto * self = reinterpret_cast<GStreamerProxy *>(user_data);
+      auto * self = reinterpret_cast<ImageProxyNode *>(user_data);
 
       GstSample * sample = gst_app_sink_pull_sample(GST_APP_SINK_CAST(sink));
       const cv::Mat image = gst_to_cv_mat(sample);
@@ -147,11 +99,9 @@ auto GStreamerProxy::configure_stream() -> bool
 
       sensor_msgs::msg::Image image_msg = cv_mat_to_ros_image(image);
       image_msg.header = self->camera_info_->header;
-
       self->camera_pub_->publish(image_msg, *self->camera_info_);
 
       gst_sample_unref(sample);
-
       return GST_FLOW_OK;
     },
     nullptr,  // new_event
@@ -159,14 +109,14 @@ auto GStreamerProxy::configure_stream() -> bool
     nullptr};
   gst_app_sink_set_callbacks(GST_APP_SINK_CAST(sink), &callbacks, this, nullptr);
 
-  // Set the callback for the bus; this lets us handle errors
+  // set the callback for the bus; this lets us handle errors
   GstBus * bus;
   bus = gst_pipeline_get_bus(GST_PIPELINE(pipeline_));  // NOLINT(bugprone-casting-through-void)
   gst_bus_add_watch(
     bus,
     [](GstBus * /*bus*/, GstMessage * message, gpointer user_data) -> gboolean {
       if (GST_MESSAGE_TYPE(message) == GST_MESSAGE_ERROR) {
-        auto * self = reinterpret_cast<GStreamerProxy *>(user_data);
+        auto * self = reinterpret_cast<ImageProxyNode *>(user_data);
         GError * error;
         gchar * debug;
         gst_message_parse_error(message, &error, &debug);
@@ -188,8 +138,11 @@ auto GStreamerProxy::configure_stream() -> bool
   return true;
 }
 
-auto GStreamerProxy::shutdown_stream() -> void
+auto ImageProxyNode::shutdown_stream() -> void
 {
+  if (pipeline_ == nullptr) {
+    return;
+  }
   gst_element_set_state(pipeline_, GST_STATE_NULL);
   gst_object_unref(pipeline_);
 }
@@ -197,4 +150,4 @@ auto GStreamerProxy::shutdown_stream() -> void
 }  // namespace barlus
 
 #include <rclcpp_components/register_node_macro.hpp>
-RCLCPP_COMPONENTS_REGISTER_NODE(barlus::GStreamerProxy)
+RCLCPP_COMPONENTS_REGISTER_NODE(barlus::ImageProxyNode)

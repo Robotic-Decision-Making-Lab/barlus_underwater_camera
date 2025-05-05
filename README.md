@@ -59,16 +59,9 @@ ffplay  -fflags nobuffer -flags low_delay -probesize 32 -rtsp_transport udp -i r
 
 ## ROS 2 interface
 
-`barlus_gstreamer_proxy` has been implemented to convert frames received from
-the camera into ROS 2 `sensor_msgs/Image` messages using GStreamer. After
-building `barlus_gstreamer_proxy`, the node can be launched using
-
-```bash
-ros2 launch barlus_gstreamer_proxy gstreamer_proxy.launch.py
-```
-
-The raw frames will be published to the topic `/barlus/image_raw`. The camera
-intrinsics are available on the topic `/barlus/camera_info`.
+`barlus_image_pipeline` has been implemented to support camera integration into
+a ROS 2 environment. Please see the package documentation for further
+information on the implemented nodes.
 
 ## Camera calibration
 

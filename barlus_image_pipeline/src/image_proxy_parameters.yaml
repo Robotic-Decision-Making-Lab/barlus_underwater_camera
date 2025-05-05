@@ -1,0 +1,30 @@
+image_proxy_node:
+  camera_name:
+    type: string
+    default_value: barlus
+    description: The name of the camera.
+
+  stream_address:
+    type: string
+    default_value: rtsp://192.168.1.10:554/user=admin&password=&channel=1&stream=0.sdp
+    description: The RTSP stream address. This can be either the stream from the camera itself or from MediaMTX.
+
+  camera_info_url:
+    type: string
+    default_value: ""
+    description: The URL to the camera info file. This file contains the camera calibration information.
+
+  frame_id:
+    type: string
+    default_value: camera_link
+    description: The frame ID of the camera.
+
+  image_width:
+    type: int
+    default_value: 3072
+    description: The width of the camera image.
+
+  image_height:
+    type: int
+    default_value: 2048
+    description: The height of the camera image.

@@ -412,7 +412,7 @@ pathDefaults:
 # for example "~^prefix" will match all paths that start with "prefix".
 paths:
   barlus:
-    source: rtsp://192.168.1.11:554/user=admin&password=&channel=1&stream=0.sdp?
+    source: rtsp://192.168.1.10:554/user=admin&password=&channel=1&stream=0.sdp?
     sourceOnDemand: no
     sourceOnDemandStartTimeout: 10s
     sourceOnDemandCloseAfter: 10s

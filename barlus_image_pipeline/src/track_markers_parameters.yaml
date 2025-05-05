@@ -1,4 +1,4 @@
-gstreamer_proxy:
+track_markers_node:
   camera_name:
     type: string
     default_value: barlus
@@ -19,12 +19,23 @@ gstreamer_proxy:
     default_value: camera_link
     description: The frame ID of the camera.
 
-  image_width:
-    type: int
-    default_value: 3072
-    description: The width of the camera image.
+  marker_ids:
+    type: int_array
+    description: The list of marker IDs to track.
+    validation:
+      not_empty<>: null
 
-  image_height:
+  marker_size:
+    type: double
+    default_value: 0.5
+    description: The size of the markers in meters.
+
+  dictionary:
     type: int
-    default_value: 2048
-    description: The height of the camera image.
+    default_value: 0
+    description: The markers' dictionary.
+
+  publish_tf:
+    type: bool
+    default_value: false
+    description: Whether to publish the TF of the detected markers.

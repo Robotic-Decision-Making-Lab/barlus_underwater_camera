@@ -1,4 +1,4 @@
-# Camera intrinsics for the Barlus UW-S5-3PBX10 underwater.
+# underwater camera intrinsics for the Barlus UW-S5-3PBX10
 image_width: 3072
 image_height: 2048
 camera_name: barlus
