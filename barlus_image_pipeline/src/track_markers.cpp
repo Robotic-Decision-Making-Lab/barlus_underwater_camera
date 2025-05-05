@@ -131,12 +131,12 @@ auto TrackMarkersNode::configure_stream() -> bool
       cv::Mat dist_coeffs(d.size(), 1, CV_64FC1, reinterpret_cast<void *>(d.data()));
 
       // undistort the image
-      cv::Mat image_undistored;
-      cv::undistort(image_raw, image_undistored, intrinsics, dist_coeffs);
+      cv::Mat image_undistorted;
+      cv::undistort(image_raw, image_undistorted, intrinsics, dist_coeffs);
 
       // convert the image to grayscale
       cv::Mat image_gray;
-      cv::cvtColor(image_undistored, image_gray, cv::COLOR_BGR2GRAY);
+      cv::cvtColor(image_undistorted, image_gray, cv::COLOR_BGR2GRAY);
 
       // detect the markers from the processed image
       std::vector<int> ids;
