@@ -32,7 +32,7 @@ the barlus_image_pipeline package, the track_markers_node can be launched using
 ros2 launch barlus_image_pipeline track_markers.launch.py
 ```
 
-Each configured marker will have its pose published on a `/<marker-id>/pose`
+Each configured marker will have its pose published on a `/barlus/marker_<marker-id>/pose`
 topic.
 
 > [!NOTE]

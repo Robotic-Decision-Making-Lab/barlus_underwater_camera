@@ -41,7 +41,7 @@ class ImageProxyNode : public rclcpp::Node
 public:
   explicit ImageProxyNode(const rclcpp::NodeOptions & options = rclcpp::NodeOptions());
 
-  ~ImageProxyNode();
+  ~ImageProxyNode() override;
 
 private:
   auto configure_stream() -> bool;

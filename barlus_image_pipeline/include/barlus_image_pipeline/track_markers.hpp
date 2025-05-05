@@ -43,7 +43,7 @@ class TrackMarkersNode : public rclcpp::Node
 public:
   explicit TrackMarkersNode(const rclcpp::NodeOptions & options = rclcpp::NodeOptions());
 
-  ~TrackMarkersNode();
+  ~TrackMarkersNode() override;
 
 private:
   auto configure_stream() -> bool;
@@ -55,15 +55,14 @@ private:
 
   std::unique_ptr<sensor_msgs::msg::CameraInfo> camera_info_;
   std::shared_ptr<camera_info_manager::CameraInfoManager> camera_info_manager_;
-  std::unordered_map<int, std::shared_ptr<rclcpp::Publisher<geometry_msgs::msg::PoseStamped>>> pose_pub_map_;
+  std::unordered_map<int, std::shared_ptr<rclcpp::Publisher<geometry_msgs::msg::PoseStamped>>> publisher_map_;
+  std::unique_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;
 
   GstElement * pipeline_;
 
   cv::Mat obj_points_;
   cv::Ptr<cv::aruco::Dictionary> dictionary_;
   cv::Ptr<cv::aruco::DetectorParameters> detector_params_;
-
-  std::unique_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;
 };
 
 }  // namespace barlus

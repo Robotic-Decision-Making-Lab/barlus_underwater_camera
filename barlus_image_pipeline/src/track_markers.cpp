@@ -71,7 +71,7 @@ TrackMarkersNode::TrackMarkersNode(const rclcpp::NodeOptions & options)
   rclcpp::PublisherOptions pub_options;
   pub_options.qos_overriding_options = rclcpp::QosOverridingOptions::with_default_policies();
   for (const auto & marker_id : params_.marker_ids) {
-    pose_pub_map_[marker_id] = this->create_publisher<geometry_msgs::msg::PoseStamped>(
+    publisher_map_[marker_id] = this->create_publisher<geometry_msgs::msg::PoseStamped>(
       std::format("marker_{}/pose", marker_id), 10, pub_options);
   }
 
@@ -159,7 +159,7 @@ auto TrackMarkersNode::configure_stream() -> bool
 
       // publish the pose & transform for each marker
       for (const auto & [i, marker_id] : std::views::enumerate(ids)) {
-        if (self->pose_pub_map_.find(marker_id) == self->pose_pub_map_.end()) {
+        if (self->publisher_map_.find(marker_id) == self->publisher_map_.end()) {
           continue;
         }
 
@@ -175,7 +175,7 @@ auto TrackMarkersNode::configure_stream() -> bool
         const tf2::Quaternion q(rvec.normalized(), rvec.length());
         tf2::convert(q, pose.pose.orientation);
 
-        self->pose_pub_map_[marker_id]->publish(pose);
+        self->publisher_map_[marker_id]->publish(pose);
 
         if (self->params_.publish_tf) {
           geometry_msgs::msg::TransformStamped transform;
