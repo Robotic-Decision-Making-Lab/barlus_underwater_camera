@@ -146,6 +146,10 @@ auto TrackMarkersNode::configure_stream() -> bool
         for (std::size_t i = 0; i < n_markers; i++) {
           cv::solvePnP(self->obj_points_, corners[i], intrinsics, dist_coeffs, rvecs[i], tvecs[i]);
         }
+      } else {
+        RCLCPP_DEBUG(self->get_logger(), "No markers detected");
+        gst_sample_unref(sample);
+        return GST_FLOW_OK;
       }
 
       // publish the pose for each marker
