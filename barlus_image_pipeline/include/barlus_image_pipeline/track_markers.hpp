@@ -21,9 +21,11 @@
 #pragma once
 
 #include <gst/gst.h>
+#include <tf2_ros/transform_broadcaster.h>
 
 #include <camera_info_manager/camera_info_manager.hpp>
 #include <geometry_msgs/msg/pose_stamped.hpp>
+#include <geometry_msgs/msg/transform_stamped.hpp>
 #include <memory>
 #include <opencv2/aruco.hpp>
 #include <rclcpp/node.hpp>
@@ -60,6 +62,8 @@ private:
   cv::Mat obj_points_;
   cv::Ptr<cv::aruco::Dictionary> dictionary_;
   cv::Ptr<cv::aruco::DetectorParameters> detector_params_;
+
+  std::unique_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;
 };
 
 }  // namespace barlus

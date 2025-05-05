@@ -34,3 +34,8 @@ track_markers_node:
     type: int
     default_value: 0
     description: The markers' dictionary.
+
+  publish_tf:
+    type: bool
+    default_value: false
+    description: Whether to publish the TF of the detected markers.

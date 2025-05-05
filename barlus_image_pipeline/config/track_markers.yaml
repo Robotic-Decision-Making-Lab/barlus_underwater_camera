@@ -26,3 +26,6 @@
     # The markers' dictionary.
     # see https://github.com/opencv/opencv/blob/4ad4bd5dc09b343b2be6c8137b563f143d68584d/modules/objdetect/include/opencv2/objdetect/aruco_dictionary.hpp#L99
     dictionary: 0 # DICT_4X4_50
+
+    # Whether or not to publish the TF of the detected markers.
+    publish_tf: false

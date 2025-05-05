@@ -61,6 +61,11 @@ TrackMarkersNode::TrackMarkersNode(const rclcpp::NodeOptions & options)
     return;
   }
 
+  // configure the tf broadcaster if enabled
+  if (params_.publish_tf) {
+    tf_broadcaster_ = std::make_unique<tf2_ros::TransformBroadcaster>(*this);
+  }
+
   // configure a publisher for each marker id
   // allow the qos policies to be overridden
   rclcpp::PublisherOptions pub_options;
@@ -152,7 +157,7 @@ auto TrackMarkersNode::configure_stream() -> bool
         return GST_FLOW_OK;
       }
 
-      // publish the pose for each marker
+      // publish the pose & transform for each marker
       for (const auto & [i, marker_id] : std::views::enumerate(ids)) {
         if (self->pose_pub_map_.find(marker_id) == self->pose_pub_map_.end()) {
           continue;
@@ -171,6 +176,18 @@ auto TrackMarkersNode::configure_stream() -> bool
         tf2::convert(q, pose.pose.orientation);
 
         self->pose_pub_map_[marker_id]->publish(pose);
+
+        if (self->params_.publish_tf) {
+          geometry_msgs::msg::TransformStamped transform;
+          transform.header = pose.header;
+          transform.child_frame_id = std::format("marker_{}", marker_id);
+          transform.transform.translation.x = pose.pose.position.x;
+          transform.transform.translation.y = pose.pose.position.y;
+          transform.transform.translation.z = pose.pose.position.z;
+          transform.transform.rotation = pose.pose.orientation;
+
+          self->tf_broadcaster_->sendTransform(transform);
+        }
       }
 
       gst_sample_unref(sample);
