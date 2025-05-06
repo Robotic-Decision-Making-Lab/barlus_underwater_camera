@@ -94,10 +94,15 @@ auto ImageProxyNode::configure_stream() -> bool
       GstSample * sample = gst_app_sink_pull_sample(GST_APP_SINK_CAST(sink));
       const cv::Mat image = gst_to_cv_mat(sample);
 
+      const cv::Mat resized_image = resize_image(image, self->params_.resize_factor);
+
       *self->camera_info_ = self->camera_info_manager_->getCameraInfo();
       self->camera_info_->header.stamp = self->now();
 
-      sensor_msgs::msg::Image image_msg = cv_mat_to_ros_image(image);
+      self->camera_info_->height = resized_image.rows;
+      self->camera_info_->width = resized_image.cols;
+
+      sensor_msgs::msg::Image image_msg = cv_mat_to_ros_image(resized_image);
       image_msg.header = self->camera_info_->header;
       self->camera_pub_->publish(image_msg, *self->camera_info_);
 
