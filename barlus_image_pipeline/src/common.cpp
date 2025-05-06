@@ -43,4 +43,15 @@ auto cv_mat_to_ros_image(const cv::Mat & image) -> sensor_msgs::msg::Image
   return *cv_image.toImageMsg();
 }
 
+auto resize_image(const cv::Mat & image, double resize_factor) -> cv::Mat
+{
+  const int new_width = static_cast<int>(image.cols * resize_factor);
+  const int new_height = static_cast<int>(image.rows * resize_factor);
+
+  cv::Mat resized_image;
+  cv::resize(image, resized_image, cv::Size(new_width, new_height));
+
+  return resized_image;
+}
+
 }  // namespace barlus

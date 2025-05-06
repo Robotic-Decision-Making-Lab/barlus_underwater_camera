@@ -7,12 +7,16 @@ track_markers_node:
   stream_address:
     type: string
     default_value: rtsp://192.168.1.10:554/user=admin&password=&channel=1&stream=0.sdp
-    description: The RTSP stream address. This can be either the stream from the camera itself or from MediaMTX.
+    description: >
+      The RTSP stream address. This can be either the stream from the camera
+      itself or from MediaMTX.
 
   camera_info_url:
     type: string
     default_value: ""
-    description: The URL to the camera info file. This file contains the camera calibration information.
+    description: >
+      The URL to the camera info file. This file contains the camera
+      calibration information.
 
   frame_id:
     type: string
@@ -39,3 +43,12 @@ track_markers_node:
     type: bool
     default_value: false
     description: Whether to publish the TF of the detected markers.
+
+  resize_factor:
+    type: double
+    default_value: 1.0
+    description: >
+      The resize factor for the image. This will preserve the aspect ratio of
+      the image.
+    validation:
+      gt<>: 0.0

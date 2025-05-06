@@ -123,6 +123,9 @@ auto TrackMarkersNode::configure_stream() -> bool
       GstSample * sample = gst_app_sink_pull_sample(GST_APP_SINK_CAST(sink));
       const cv::Mat image_raw = gst_to_cv_mat(sample);
 
+      // resize the image
+      const cv::Mat resized_image = resize_image(image_raw, self->params_.resize_factor);
+
       auto k = self->camera_info_->k;
       auto d = self->camera_info_->d;
 
@@ -132,7 +135,7 @@ auto TrackMarkersNode::configure_stream() -> bool
 
       // undistort the image
       cv::Mat image_undistorted;
-      cv::undistort(image_raw, image_undistorted, intrinsics, dist_coeffs);
+      cv::undistort(resized_image, image_undistorted, intrinsics, dist_coeffs);
 
       // convert the image to grayscale
       cv::Mat image_gray;
