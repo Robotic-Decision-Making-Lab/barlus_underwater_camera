@@ -39,7 +39,7 @@ image_proxy_node:
 
   resize_factor:
     type: double
-    default_value: 0.25
+    default_value: 1.0
     description: >
       The resize factor for the image. This will preserve the aspect ratio of
       the image.
