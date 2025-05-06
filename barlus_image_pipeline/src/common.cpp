@@ -45,13 +45,8 @@ auto cv_mat_to_ros_image(const cv::Mat & image) -> sensor_msgs::msg::Image
 
 auto resize_image(const cv::Mat & image, double resize_factor) -> cv::Mat
 {
-  const int original_width = image.cols;
-  const int original_height = image.rows;
-
-  // preserve aspect ratio
-  const int new_width = static_cast<int>(original_width * resize_factor);
-  const double aspect_ratio = static_cast<double>(new_width) / original_width;
-  const int new_height = static_cast<int>(original_height * aspect_ratio);
+  const int new_width = static_cast<int>(image.cols * resize_factor);
+  const int new_height = static_cast<int>(image.rows * resize_factor);
 
   cv::Mat resized_image;
   cv::resize(image, resized_image, cv::Size(new_width, new_height));
