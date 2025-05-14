@@ -16,6 +16,7 @@ find_package(generate_parameter_library REQUIRED)
 find_package(PkgConfig REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
+find_package(Boost REQUIRED COMPONENTS system)
 
 pkg_search_module(gstreamer REQUIRED IMPORTED_TARGET gstreamer-1.0)
 pkg_search_module(gstreamer-app REQUIRED IMPORTED_TARGET gstreamer-app-1.0)
@@ -37,7 +38,7 @@ target_sources(
 target_compile_features(image_proxy_component PUBLIC cxx_std_23)
 target_link_libraries(
     image_proxy_component
-    PRIVATE image_proxy_parameters
+    PRIVATE image_proxy_parameters Boost::system
     PUBLIC
         PkgConfig::gstreamer
         PkgConfig::gstreamer-app
@@ -46,6 +47,7 @@ target_link_libraries(
         cv_bridge::cv_bridge
         camera_info_manager::camera_info_manager
         image_transport::image_transport
+        Boost::boost
         ${geometry_msgs_TARGETS}
         ${OpenCV_LIBS}
 )

@@ -23,10 +23,12 @@
 #include <gst/gst.h>
 #include <tf2_ros/transform_broadcaster.h>
 
+#include <boost/circular_buffer.hpp>
 #include <camera_info_manager/camera_info_manager.hpp>
 #include <geometry_msgs/msg/pose_stamped.hpp>
 #include <geometry_msgs/msg/transform_stamped.hpp>
 #include <memory>
+#include <mutex>
 #include <opencv2/aruco.hpp>
 #include <rclcpp/node.hpp>
 #include <rclcpp/rclcpp.hpp>
@@ -57,8 +59,12 @@ private:
   std::shared_ptr<camera_info_manager::CameraInfoManager> camera_info_manager_;
   std::unordered_map<int, std::shared_ptr<rclcpp::Publisher<geometry_msgs::msg::PoseStamped>>> publisher_map_;
   std::unique_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;
+  std::shared_ptr<rclcpp::TimerBase> process_samples_timer_;
 
   GstElement * pipeline_;
+
+  std::mutex sample_mutex_;
+  boost::circular_buffer<cv::Mat> samples_;
 
   cv::Mat obj_points_;
   cv::Ptr<cv::aruco::Dictionary> dictionary_;

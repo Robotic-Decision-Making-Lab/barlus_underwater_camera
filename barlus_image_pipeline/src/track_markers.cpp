@@ -32,7 +32,8 @@ namespace barlus
 {
 
 TrackMarkersNode::TrackMarkersNode(const rclcpp::NodeOptions & options)
-: Node("track_markers_node", options)
+: Node("track_markers_node", options),
+  samples_(boost::circular_buffer<cv::Mat>(35))
 {
   param_listener_ = std::make_shared<track_markers_node::ParamListener>(get_node_parameters_interface());
   params_ = param_listener_->get_params();
@@ -75,6 +76,91 @@ TrackMarkersNode::TrackMarkersNode(const rclcpp::NodeOptions & options)
       std::format("marker_{}/pose", marker_id), 10, pub_options);
   }
 
+  // create a timer to process samples
+  // set the rate to ~30 FPS, which is faster than the camera
+  process_samples_timer_ = this->create_wall_timer(std::chrono::milliseconds(30), [this]() {
+    cv::Mat image_raw;
+    {
+      std::lock_guard<std::mutex> lock(sample_mutex_);
+      if (samples_.empty()) {
+        return;
+      }
+      image_raw = samples_.front();
+      samples_.pop_front();
+    }
+
+    *camera_info_ = camera_info_manager_->getCameraInfo();
+
+    // resize the image
+    const cv::Mat resized_image = resize_image(image_raw, params_.resize_factor);
+
+    auto k = camera_info_->k;
+    auto d = camera_info_->d;
+
+    // convert the camera info into a cv::Mat
+    cv::Mat intrinsics(3, 3, CV_64FC1, reinterpret_cast<void *>(k.data()));
+    cv::Mat dist_coeffs(d.size(), 1, CV_64FC1, reinterpret_cast<void *>(d.data()));
+
+    // undistort the image
+    cv::Mat image_undistorted;
+    cv::undistort(resized_image, image_undistorted, intrinsics, dist_coeffs);
+
+    // convert the image to grayscale
+    cv::Mat image_gray;
+    cv::cvtColor(image_undistorted, image_gray, cv::COLOR_BGR2GRAY);
+
+    // detect the markers from the processed image
+    std::vector<int> ids;
+    std::vector<std::vector<cv::Point2f>> corners, rejected;
+    cv::aruco::detectMarkers(image_gray, dictionary_, corners, ids, detector_params_, rejected);
+
+    // estimate the pose of each marker
+    std::size_t n_markers = corners.size();
+    std::vector<cv::Vec3d> rvecs(n_markers), tvecs(n_markers);
+
+    if (ids.empty()) {
+      RCLCPP_DEBUG(get_logger(), "No markers detected");
+      return;
+    }
+
+    for (std::size_t i = 0; i < n_markers; i++) {
+      cv::solvePnP(obj_points_, corners[i], intrinsics, dist_coeffs, rvecs[i], tvecs[i]);
+    }
+
+    // publish the pose & transform for each marker
+    for (const auto & [i, marker_id] : std::views::enumerate(ids)) {
+      if (publisher_map_.find(marker_id) == publisher_map_.end()) {
+        continue;
+      }
+
+      auto pose = geometry_msgs::msg::PoseStamped();
+      pose.header.frame_id = params_.frame_id;
+      pose.header.stamp = now();
+
+      pose.pose.position.x = tvecs[i][0];
+      pose.pose.position.y = tvecs[i][1];
+      pose.pose.position.z = tvecs[i][2];
+
+      const tf2::Vector3 rvec(rvecs[i][0], rvecs[i][1], rvecs[i][2]);
+      const tf2::Quaternion q(rvec.normalized(), rvec.length());
+      tf2::convert(q, pose.pose.orientation);
+
+      publisher_map_[marker_id]->publish(pose);
+
+      if (params_.publish_tf) {
+        geometry_msgs::msg::TransformStamped transform;
+        transform.header = pose.header;
+        transform.child_frame_id = std::format("marker_{}", marker_id);
+        transform.transform.translation.x = pose.pose.position.x;
+        transform.transform.translation.y = pose.pose.position.y;
+        transform.transform.translation.z = pose.pose.position.z;
+        transform.transform.rotation = pose.pose.orientation;
+
+        tf_broadcaster_->sendTransform(transform);
+      }
+    }
+  });
+
   if (!configure_stream()) {
     shutdown_stream();
     rclcpp::shutdown();
@@ -116,83 +202,14 @@ auto TrackMarkersNode::configure_stream() -> bool
     nullptr,                                                                                     // eos
     [](GstAppSink * /*sink*/, gpointer /*user_data*/) -> GstFlowReturn { return GST_FLOW_OK; },  // new_preroll
     [](GstAppSink * sink, gpointer user_data) -> GstFlowReturn {                                 // new_sample
-      auto * self = reinterpret_cast<TrackMarkersNode *>(user_data);
-      *self->camera_info_ = self->camera_info_manager_->getCameraInfo();
-
       // convert the sample to a cv::Mat image
       GstSample * sample = gst_app_sink_pull_sample(GST_APP_SINK_CAST(sink));
       const cv::Mat image_raw = gst_to_cv_mat(sample);
-
-      // resize the image
-      const cv::Mat resized_image = resize_image(image_raw, self->params_.resize_factor);
-
-      auto k = self->camera_info_->k;
-      auto d = self->camera_info_->d;
-
-      // convert the camera info to a cv::Mat
-      cv::Mat intrinsics(3, 3, CV_64FC1, reinterpret_cast<void *>(k.data()));
-      cv::Mat dist_coeffs(d.size(), 1, CV_64FC1, reinterpret_cast<void *>(d.data()));
-
-      // undistort the image
-      cv::Mat image_undistorted;
-      cv::undistort(resized_image, image_undistorted, intrinsics, dist_coeffs);
-
-      // convert the image to grayscale
-      cv::Mat image_gray;
-      cv::cvtColor(image_undistorted, image_gray, cv::COLOR_BGR2GRAY);
-
-      // detect the markers from the processed image
-      std::vector<int> ids;
-      std::vector<std::vector<cv::Point2f>> corners, rejected;
-      cv::aruco::detectMarkers(image_gray, self->dictionary_, corners, ids, self->detector_params_, rejected);
-
-      // estimate the pose of each marker
-      std::size_t n_markers = corners.size();
-      std::vector<cv::Vec3d> rvecs(n_markers), tvecs(n_markers);
-
-      if (!ids.empty()) {
-        for (std::size_t i = 0; i < n_markers; i++) {
-          cv::solvePnP(self->obj_points_, corners[i], intrinsics, dist_coeffs, rvecs[i], tvecs[i]);
-        }
-      } else {
-        RCLCPP_DEBUG(self->get_logger(), "No markers detected");
-        gst_sample_unref(sample);
-        return GST_FLOW_OK;
+      {
+        auto * self = reinterpret_cast<TrackMarkersNode *>(user_data);
+        std::lock_guard<std::mutex> lock(self->sample_mutex_);
+        self->samples_.push_back(image_raw);
       }
-
-      // publish the pose & transform for each marker
-      for (const auto & [i, marker_id] : std::views::enumerate(ids)) {
-        if (self->publisher_map_.find(marker_id) == self->publisher_map_.end()) {
-          continue;
-        }
-
-        auto pose = geometry_msgs::msg::PoseStamped();
-        pose.header.frame_id = self->params_.frame_id;
-        pose.header.stamp = self->now();
-
-        pose.pose.position.x = tvecs[i][0];
-        pose.pose.position.y = tvecs[i][1];
-        pose.pose.position.z = tvecs[i][2];
-
-        const tf2::Vector3 rvec(rvecs[i][0], rvecs[i][1], rvecs[i][2]);
-        const tf2::Quaternion q(rvec.normalized(), rvec.length());
-        tf2::convert(q, pose.pose.orientation);
-
-        self->publisher_map_[marker_id]->publish(pose);
-
-        if (self->params_.publish_tf) {
-          geometry_msgs::msg::TransformStamped transform;
-          transform.header = pose.header;
-          transform.child_frame_id = std::format("marker_{}", marker_id);
-          transform.transform.translation.x = pose.pose.position.x;
-          transform.transform.translation.y = pose.pose.position.y;
-          transform.transform.translation.z = pose.pose.position.z;
-          transform.transform.rotation = pose.pose.orientation;
-
-          self->tf_broadcaster_->sendTransform(transform);
-        }
-      }
-
       gst_sample_unref(sample);
       return GST_FLOW_OK;
     },
@@ -200,26 +217,6 @@ auto TrackMarkersNode::configure_stream() -> bool
     nullptr,  // propose_allocation
     nullptr};
   gst_app_sink_set_callbacks(GST_APP_SINK_CAST(sink), &callbacks, this, nullptr);
-
-  // set the callback for the bus - this lets us handle errors
-  GstBus * bus;
-  bus = gst_pipeline_get_bus(GST_PIPELINE(pipeline_));  // NOLINT(bugprone-casting-through-void)
-  gst_bus_add_watch(
-    bus,
-    [](GstBus * /*bus*/, GstMessage * message, gpointer user_data) -> gboolean {
-      if (GST_MESSAGE_TYPE(message) == GST_MESSAGE_ERROR) {
-        auto * self = reinterpret_cast<TrackMarkersNode *>(user_data);
-        GError * error;
-        gchar * debug;
-        gst_message_parse_error(message, &error, &debug);
-        RCLCPP_ERROR(self->get_logger(), "Error: %s", error->message);  // NOLINT
-        g_error_free(error);
-        g_free(debug);
-      }
-      return static_cast<gboolean>(true);
-    },
-    this);
-  gst_object_unref(bus);
 
   const GstStateChangeReturn ret = gst_element_set_state(pipeline_, GST_STATE_PLAYING);
   if (ret == GST_STATE_CHANGE_FAILURE) {
