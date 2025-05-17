@@ -25,6 +25,7 @@
   <depend>tf2</depend>
   <depend>tf2_geometry_msgs</depend>
   <depend>image_pipeline</depend>
+  <depend>boost</depend>
 
   <export>
     <build_type>ament_cmake</build_type>

@@ -2,5 +2,5 @@
 *
 
 # Except the following
-!barlus_gstreamer_proxy
+!barlus_image_pipeline
 !compose
